@@ -1,5 +1,6 @@
 package com.motherskitchen.backend.DTO.User;
 
+import com.motherskitchen.backend.DTO.Order.OrdersCreateDTO;
 import lombok.*;
 
 import java.util.List;
@@ -14,6 +15,5 @@ public class SignUpDTO {
     private String email;
     private String password;
     private String phoneNo;
-    private List<AddressesDTO> addresses;
 
 }

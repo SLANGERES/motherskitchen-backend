@@ -1,8 +1,5 @@
-package com.motherskitchen.backend.Models.Inventory;
+package com.motherskitchen.backend.DTO.Inventory;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import lombok.*;
 
 import java.util.UUID;
@@ -12,23 +9,12 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity
-@Table(name="Inventory")
-public class Inventory {
+public class ProductDTO {
 
-    @Id
     private UUID id;
-
     private String name;
-
     private String description;
-
     private double price;
-
     private String category;
-
     private String image;
-
-    private boolean isActive;
-
 }

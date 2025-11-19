@@ -1,5 +1,6 @@
-package com.motherskitchen.backend.Models.User;
+package com.motherskitchen.backend.Models;
 
+import com.motherskitchen.backend.Models.User.User;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.UUID;
@@ -10,8 +11,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name="address")
+@Table(name = "address")
 public class Address {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -22,7 +24,7 @@ public class Address {
 
     private String postalcode;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @OneToOne
+    @JoinColumn(name = "order_id")
+    private Orders order;
 }

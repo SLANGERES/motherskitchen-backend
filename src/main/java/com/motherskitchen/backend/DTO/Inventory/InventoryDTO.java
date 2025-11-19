@@ -11,11 +11,9 @@ import java.util.UUID;
 @Builder
 public class InventoryDTO {
 
-    private UUID id;
     private String name;
     private String description;
     private double price;
     private String category;
     private String image;
-
 }

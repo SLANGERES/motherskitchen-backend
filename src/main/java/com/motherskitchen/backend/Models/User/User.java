@@ -28,6 +28,4 @@ public class User {
 
     private String phoneNo;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Address> addresses;
 }

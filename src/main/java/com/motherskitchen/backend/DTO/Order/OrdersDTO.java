@@ -1,5 +1,6 @@
 package com.motherskitchen.backend.DTO.Order;
 
+
 import lombok.Data;
 import java.util.List;
 import java.util.UUID;
@@ -13,4 +14,5 @@ public class OrdersDTO {
     private String status;
 
     private List<OrderItemDTO> items;
+    private AddressDTO address;
 }

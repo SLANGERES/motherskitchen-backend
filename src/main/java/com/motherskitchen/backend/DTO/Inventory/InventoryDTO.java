@@ -1,0 +1,21 @@
+package com.motherskitchen.backend.DTO.Inventory;
+
+import lombok.*;
+
+import java.util.UUID;
+
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class InventoryDTO {
+
+    private UUID id;
+    private String name;
+    private String description;
+    private double price;
+    private String category;
+    private String image;
+
+}

@@ -10,10 +10,12 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class UserDTO {
 
     private UUID id;
     private String name;
     private String email;
     private String phoneNo;
+
 }

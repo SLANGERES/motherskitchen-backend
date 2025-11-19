@@ -11,6 +11,6 @@ public class OrdersCreateDTO {
 
     private UUID customerId;
     private List<OrderItemDTO> items;
-    private AddressDTO addressDTO;
+    private AddressDTO address;
 
 }

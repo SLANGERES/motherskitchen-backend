@@ -21,13 +21,14 @@ public class Orders {
 
     private UUID customerId;
 
-    private Double totalAmount;
+    private Double total;
 
     private String status;
+
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Embedded
     private Address address;
 }

@@ -1,14 +1,16 @@
 package com.motherskitchen.backend.Models;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 @Table(name = "order_item")
 public class OrderItem {
 
@@ -19,6 +21,7 @@ public class OrderItem {
     private UUID itemId;
 
     private Integer quantity;
+
     private Double price;
 
     @ManyToOne

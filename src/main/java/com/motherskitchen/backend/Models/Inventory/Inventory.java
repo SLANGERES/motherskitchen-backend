@@ -1,8 +1,6 @@
 package com.motherskitchen.backend.Models.Inventory;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.UUID;
@@ -17,6 +15,7 @@ import java.util.UUID;
 public class Inventory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
     private String name;

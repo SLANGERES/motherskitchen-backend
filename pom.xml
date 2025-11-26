@@ -115,7 +115,7 @@
 	<profiles>
 		<!-- Production profile for Railway -->
 		<profile>
-			<id>production</id>
+			<id>prod</id>
 			<properties>
 				<spring.profiles.active>prod</spring.profiles.active>
 			</properties>

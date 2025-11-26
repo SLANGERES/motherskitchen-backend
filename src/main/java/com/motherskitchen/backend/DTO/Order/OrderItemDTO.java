@@ -11,6 +11,8 @@ public class OrderItemDTO {
     @NotBlank
     private UUID itemId;
     @NotBlank
+
+    private String name;
     private Integer quantity;
     private Double price;
 }

@@ -26,7 +26,9 @@ public class Inventory {
 
     private String category;
 
-    private String image;
+    private String imageUrl;
+
+    private String imageKey;
 
     private boolean isActive;
 

@@ -82,6 +82,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 // Assuming you added a validateToken() method to AuthUtil
                 if (authUtil.validateToken(jwt)) {
+                    System.out.println("User authorities: " + userDetails.getAuthorities());
                     // 4. Create and set Authentication object
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
@@ -94,7 +95,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                     // Set the Authentication in the Security Context
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    System.out.println("Authentication successful for: " + userEmail);
+                    System.out.println("Authentication successful for: " + userEmail + " with roles: " + userDetails.getAuthorities());
                 } else {
                     System.err.println("Token validation failed");
                 }

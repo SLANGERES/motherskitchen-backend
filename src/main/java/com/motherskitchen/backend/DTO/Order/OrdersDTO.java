@@ -4,6 +4,8 @@ package com.motherskitchen.backend.DTO.Order;
 import com.motherskitchen.backend.Models.Address;
 import lombok.Builder;
 import lombok.Data;
+
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,10 +14,13 @@ import java.util.UUID;
 public class OrdersDTO {
 
     private UUID id;
-    private UUID customerId;
+    private String name;
+    private String email;
+    private String phone;
     private Double totalAmount;
     private String status;
-
+    private LocalDate deliveryDate;
+    private String Notes;
     private List<OrderItemDTO> items;
     private Address address;
 }

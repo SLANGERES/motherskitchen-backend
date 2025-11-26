@@ -1,6 +1,7 @@
 package com.motherskitchen.backend.DTO.User;
 
 import com.motherskitchen.backend.DTO.Order.OrdersCreateDTO;
+import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 import java.util.List;
@@ -10,10 +11,17 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SignUpDTO {
-
+    @NotBlank
     private String name;
+
+    @NotBlank
     private String email;
+
+
+    @NotBlank
     private String password;
-    private String phoneNo;
+
+    @NotBlank
+    private String phone;
 
 }

@@ -1,34 +1,53 @@
 package com.motherskitchen.backend.Security;
 
+import com.motherskitchen.backend.Models.User.User;
 import com.motherskitchen.backend.Repository.UserRepository;
-import org.springframework.security.core.userdetails.User;
-
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Service
+@RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public UserDetailsServiceImpl(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
+    @Value("${master.admin.email}")
+    private String masterAdminEmail;
+
+    @Value("${master.admin.password}")
+    private String masterAdminPassword;
+
+    @Value("${master.admin.role}")
+    private String masterAdminRole;  // e.g., ADMIN
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        // 1. Fetch the User entity from the database using the email (your subject)
-                com.motherskitchen.backend.Models.User.User user = userRepository.findByEmail(email)
+
+        // 1️⃣ Check master admin
+        if (email.equalsIgnoreCase(masterAdminEmail)) {
+
+            return org.springframework.security.core.userdetails.User
+                    .builder()
+                    .username(masterAdminEmail)
+                    .password(masterAdminPassword)
+                    .roles(masterAdminRole)  // ROLE_ADMIN
+                    .build();
+        }
+
+        // 2️⃣ Load DB user
+        com.motherskitchen.backend.Models.User.User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
-        // 2. Map your entity to a Spring Security UserDetails object
-        // NOTE: Your User Entity must implement UserDetails or be converted to a standard User
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPassword(),
-                user.getAuthorities() // Assumes your User entity provides granted authorities
-        );
+        return org.springframework.security.core.userdetails.User
+                .builder()
+                .username(user.getEmail())
+                .password(user.getPassword())
+                .roles(user.getRole())
+                .build();
     }
 }

@@ -1,12 +1,15 @@
 package com.motherskitchen.backend.Security.Jwt;
 
 import com.motherskitchen.backend.DTO.User.UserDTO;
+import com.motherskitchen.backend.Security.UserDetailsServiceImpl;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.util.Date;
@@ -15,7 +18,9 @@ import javax.crypto.SecretKey;
 // Consider adding an SLF4J logger here for better error reporting
 
 @Component
+@RequiredArgsConstructor
 public class AuthUtil {
+    private final UserDetailsServiceImpl userDetailsService;
 
     // It's good practice to ensure the secret key is long enough (e.g., 256 bits or 32 characters)
     @Value("${jwt.master_key}")
@@ -34,24 +39,30 @@ public class AuthUtil {
      * Generates a new JWT access token for a Donor user.
      * Token expiration is now set to 24 hours.
      */
-    public String generateAccessTokenDonor(UserDTO user) {
+    public String generateAccessToken(UserDTO user) {
         long now = System.currentTimeMillis();
-        // 1000L * 60 * 60 * 24 = 24 hours (use L for long literal)
-        long expirationDuration = 1000L * 60 * 60 * 24;
-        long expiration = now + expirationDuration;
+        long expiration = now + 1000L * 60 * 60 * 24; // 24 hours
+
+        // 🔥 Load actual SPRING SECURITY user (MASTER ADMIN or DB USER)
+        UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
 
         return Jwts.builder()
-                .subject(user.getEmail()) // Sets the subject to the user's email
+                .subject(user.getEmail())
                 .issuedAt(new Date(now))
                 .expiration(new Date(expiration))
-                // Add relevant custom claims
+
                 .claim("uid", user.getId().toString())
                 .claim("email", user.getEmail())
                 .claim("name", user.getName())
                 .claim("phone_no", user.getPhoneNo())
+
+                // 🔥 REAL ROLES HERE
+                .claim("roles", userDetails.getAuthorities())
+
                 .signWith(getSecretKey())
                 .compact();
     }
+
 
     /**
      * Extracts Claims (payload) from a signed JWT token.

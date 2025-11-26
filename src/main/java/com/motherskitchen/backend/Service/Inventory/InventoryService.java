@@ -29,7 +29,8 @@ public class InventoryService {
                 .description(request.getDescription())
                 .price(request.getPrice())
                 .category(request.getCategory())
-                .image(request.getImage())
+                .imageUrl(request.getImageURL())
+                .imageKey(request.getImageKey())
                 .isActive(true)
                 .build();
 
@@ -54,7 +55,7 @@ public class InventoryService {
                         .description(p.getDescription())
                         .price(p.getPrice())
                         .category(p.getCategory())
-                        .image(p.getImage())
+                        .image(p.getImageUrl())
                         .build()
         ).toList();
     }
@@ -71,7 +72,7 @@ public class InventoryService {
                         .description(p.getDescription())
                         .price(p.getPrice())
                         .category(p.getCategory())
-                        .image(p.getImage())
+                        .image(p.getImageUrl())
                         .build()
         ).toList();
     }
@@ -88,7 +89,7 @@ public class InventoryService {
                         .description(p.getDescription())
                         .price(p.getPrice())
                         .category(p.getCategory())
-                        .image(p.getImage())
+                        .image(p.getImageUrl())
                         .build()
         ).toList();
     }
@@ -103,7 +104,7 @@ public class InventoryService {
                         .description(p.getDescription())
                         .price(p.getPrice())
                         .category(category)
-                        .image(p.getImage())
+                        .image(p.getImageUrl())
                         .build()
                 ).toList();
     }
@@ -121,7 +122,7 @@ public class InventoryService {
                 .id(p.getId())
                 .name(p.getName())
                 .price(p.getPrice())
-                .image(p.getImage())
+                .image(p.getImageUrl())
                 .description(p.getDescription())
                 .category(p.getCategory())
                 .build();
@@ -155,6 +156,26 @@ public class InventoryService {
 
         inventoryRepository.save(product);
         return true;
+    }
+    @Transactional
+    public Optional<InventoryDTO> deleteProduct(String productId) {
+        Optional<Inventory> temp = inventoryRepository.findById(UUID.fromString(productId));
+
+        if (temp.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Inventory product = temp.get();
+        inventoryRepository.delete(product);
+        InventoryDTO response=InventoryDTO.builder()
+                .name(product.getName())
+                .description(product.getDescription())
+                .price(product.getPrice())
+                .category(product.getCategory())
+                .imageKey(product.getImageKey())
+                .imageURL(product.getImageUrl())
+                .build();
+        return Optional.of(response);
     }
 
 

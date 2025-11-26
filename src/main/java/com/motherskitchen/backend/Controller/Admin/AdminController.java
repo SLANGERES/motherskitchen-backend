@@ -6,19 +6,10 @@
 //@RestController
 //@RequestMapping("/api/v1/admin")
 //public class AdminController {
-//
-//    //Order
-//    @GetMapping("/orders")//query parameter
-//
-//    @GetMapping("/orders/{id}")
-//
-//    @GetMapping("/total-order")
-//
-//
 //    //Product
-//    @PostMapping("/product")
+//    @PostMapping("/inventory")
 //
-//    @GetMapping("/product")
+//    @GetMapping("/inventory")
 //
 //    @DeleteMapping("/product/{id})
 //

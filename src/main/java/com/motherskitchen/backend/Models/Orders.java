@@ -3,7 +3,9 @@ package com.motherskitchen.backend.Models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Locale;
 import java.util.UUID;
 
 @Getter
@@ -19,12 +21,19 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    private UUID customerId;
+    private String name;
+
+    private String email;
+
+    private String phone;
 
     private Double total;
 
     private String status;
 
+    private LocalDate deliveryDate;
+
+    private String Notes;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;

@@ -46,8 +46,14 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        // Permit OPTIONS globally (CRITICAL!)
+                        .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
+
                         // Public endpoints
-                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/party-order","/api/v1/health").permitAll()
+                        .requestMatchers("/api/v1/auth/signup",
+                                "/api/v1/auth/login",
+                                "/api/v1/party-order",
+                                "/api/v1/health").permitAll()
 
                         // Inventory endpoints – require authentication
                         .requestMatchers("/api/v1/inventory/**").authenticated()
@@ -63,7 +69,7 @@ public class SecurityConfig {
                         ).hasRole("ADMIN")
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
-                        // Everything else requires login
+                        // fallback rule
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
@@ -75,7 +81,17 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5173", "http://localhost:3000", "http://localhost:8081","https://www.motherskitchen.se/"));
+
+        configuration.setAllowedOrigins(Arrays.asList(
+                "http://localhost:5173",
+                "http://localhost:3000",
+                "http://localhost:8081",
+                "http://localhost:8080",
+                "https://motherskitchen.se",
+                "https://www.motherskitchen.se",
+                "https://api.motherskitchen.se"
+        ));
+
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
@@ -86,4 +102,5 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
+
 }

@@ -53,10 +53,12 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/signup",
                                 "/api/v1/auth/login",
                                 "/api/v1/party-order",
-                                "/api/v1/health").permitAll()
+                                "/api/v1/health",
+                        "/api/v1/inventory/**"
+                        ).permitAll()
 
                         // Inventory endpoints – require authentication
-                        .requestMatchers("/api/v1/inventory/**").authenticated()
+//                        .requestMatchers("/api/v1/inventory/**").authenticated()
 
                         // Admin ONLY endpoints
                         .requestMatchers(

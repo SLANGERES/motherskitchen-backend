@@ -8,7 +8,6 @@ import com.motherskitchen.backend.DTO.User.UserDTO;
 import com.motherskitchen.backend.Security.Jwt.AuthUtil;
 import com.motherskitchen.backend.Service.User.UserService;
 import com.motherskitchen.backend.Service.Email.EmailService;
-import com.motherskitchen.backend.Util.MessageQueue.EmailProducer;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -31,19 +30,19 @@ public class User {
     private final UserService userService;
     private final AuthUtil authUtil;
     private final AuthenticationManager authenticationManager;
-    private final EmailProducer emailProducer;
+    private final EmailService emailService;
 
     @PostMapping("/signup")
     public ResponseEntity<UUID>signUp(@Valid @RequestBody SignUpDTO request){
         UserDTO user=userService.signup(request);
 
-        AccountEmailCreationDTO queueData= AccountEmailCreationDTO.builder()
+        AccountEmailCreationDTO EmailData= AccountEmailCreationDTO.builder()
                 .to(user.getEmail())
                 .name(user.getName())
                 .uid(user.getId().toString())
                 .email(user.getEmail())
                 .build();
-        emailProducer.sendAccountMail(queueData);
+        emailService.accountCreation(EmailData);
         return new ResponseEntity<>(user.getId(), HttpStatus.CREATED);
     }
 

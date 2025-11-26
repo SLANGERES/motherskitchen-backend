@@ -5,9 +5,10 @@ import com.motherskitchen.backend.DTO.Order.OrdersCreateDTO;
 import com.motherskitchen.backend.DTO.Order.OrdersDTO;
 import com.motherskitchen.backend.DTO.User.UserDTO;
 import com.motherskitchen.backend.Security.Jwt.AuthUtil;
+import com.motherskitchen.backend.Service.Email.EmailService;
 import com.motherskitchen.backend.Service.Order.OrderService;
 import com.motherskitchen.backend.Service.User.UserService;
-import com.motherskitchen.backend.Util.MessageQueue.EmailProducer;
+
 import io.jsonwebtoken.Claims;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Null;
@@ -31,7 +32,7 @@ public class Orders {
     private final OrderService orderService;
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final EmailProducer emailProducer;
+    private final EmailService emailService;
     private final AuthUtil authUtil;
 
     @PostMapping("/")
@@ -48,7 +49,7 @@ public class Orders {
                     .order(order)
                     .build();
 
-            emailProducer.sendOrderMail(orderEmail);
+            emailService.orderConform(orderEmail);
 
             // Return created order ID
             return ResponseEntity.status(HttpStatus.CREATED).body(order.getId());

@@ -47,7 +47,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints
-                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/party-order").permitAll()
+                        .requestMatchers("/api/v1/auth/signup", "/api/v1/auth/login", "/api/v1/party-order","/api/v1/health").permitAll()
 
                         // Inventory endpoints – require authentication
                         .requestMatchers("/api/v1/inventory/**").authenticated()

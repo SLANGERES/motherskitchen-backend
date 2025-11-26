@@ -111,6 +111,20 @@ public class InventoryService {
                         .build()
                 ).toList();
     }
+    public List<ProductDTO>getTop3Product(){
+        List<Inventory> top3=inventoryRepository.findTop3By();
+        return top3.stream().map(p->
+                ProductDTO.builder()
+                        .id(p.getId())
+                        .name(p.getName())
+                        .description(p.getDescription())
+                        .price(p.getPrice())
+                        .category(p.getCategory())
+                        .image(p.getImageUrl())
+                        .isActive(p.isActive())
+                        .build()
+        ).toList();
+    }
     public Optional<ProductDTO> getProductById(String productID) {
 
         Optional<Inventory> tempProduct = inventoryRepository.findById(UUID.fromString(productID));
@@ -181,6 +195,7 @@ public class InventoryService {
                 .build();
         return Optional.of(response);
     }
+
 
 
 

@@ -3,26 +3,22 @@ package com.motherskitchen.backend.Controller.Public;
 import com.motherskitchen.backend.DTO.Email.OrderEmail;
 import com.motherskitchen.backend.DTO.Order.OrdersCreateDTO;
 import com.motherskitchen.backend.DTO.Order.OrdersDTO;
-import com.motherskitchen.backend.DTO.User.UserDTO;
 import com.motherskitchen.backend.Security.Jwt.AuthUtil;
 import com.motherskitchen.backend.Service.Email.EmailService;
 import com.motherskitchen.backend.Service.Order.OrderService;
 import com.motherskitchen.backend.Service.User.UserService;
 
-import io.jsonwebtoken.Claims;
+
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Null;
-import jakarta.websocket.server.PathParam;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/orders")
@@ -73,12 +69,19 @@ public class Orders {
             return ResponseEntity.ok(orderService.getALlOrdersByStatus(status.toUpperCase()));
         }
     }
-    @PostMapping("/status/{id}")
+    @PatchMapping("/status/{id}")
     public ResponseEntity<String>completeOrder(@PathVariable("id")String id,@RequestParam String status){
 
         return orderService.updateOrderStatus(id,status)
                 ? ResponseEntity.ok("Order status changed to completed")
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body("Unable to change status");
+    }
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String>deleteOrder(@PathVariable("id")String id){
+        if(!orderService.DeleteOrder(id)){
+            return new ResponseEntity<>("Unable to delete",HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>("",HttpStatus.OK);
     }
 }

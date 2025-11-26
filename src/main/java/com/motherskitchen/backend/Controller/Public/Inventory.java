@@ -93,7 +93,11 @@ public class Inventory {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Optional<ProductDTO>> getProductById(@PathVariable String id) {
+    public ResponseEntity<Optional<ProductDTO>> getProductById(@PathVariable() String id) {
         return ResponseEntity.ok(inventoryService.getProductById(id));
+    }
+    @GetMapping("/")
+    public ResponseEntity<List<ProductDTO>> getProductByLimit (@RequestParam int Limit) {
+        return ResponseEntity.ok(inventoryService.getTop3Product());
     }
 }

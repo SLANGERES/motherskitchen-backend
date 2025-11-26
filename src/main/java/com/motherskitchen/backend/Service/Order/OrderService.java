@@ -12,6 +12,7 @@ import com.motherskitchen.backend.Repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -163,6 +164,13 @@ public class OrderService {
         Orders orders = tempOrder.get();
         orders.setStatus(newStatus);
         orderRepository.save(orders);
+        return true;
+    }
+    public boolean DeleteOrder(String id){
+        if(!orderRepository.existsById(UUID.fromString(id))){
+            return false;
+        }
+        orderRepository.deleteById(UUID.fromString(id));
         return true;
     }
 }

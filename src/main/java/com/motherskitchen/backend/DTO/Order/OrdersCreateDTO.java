@@ -13,6 +13,7 @@ public class OrdersCreateDTO {
     private String name;
     private String email;
     private String phone;
+    private String payment ;
 
     private List<OrderItemDTO> items;
     private LocalDate deliveryDate;

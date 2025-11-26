@@ -7,6 +7,7 @@ import com.motherskitchen.backend.DTO.Inventory.InventoryDTO;
 import com.motherskitchen.backend.DTO.Inventory.ProductDTO;
 import com.motherskitchen.backend.Service.Inventory.InventoryService;
 import jakarta.validation.Valid;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +24,13 @@ public class Inventory {
 
     private final InventoryService inventoryService;
     private final S3Service s3Service;
-
-    @GetMapping("/")
+    @GetMapping("/all")
     public ResponseEntity<List<ProductDTO>> getAllProduct() {
+        return ResponseEntity.ok(inventoryService.getAllProduct());
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<List<ProductDTO>> getAllActiveProduct() {
         return ResponseEntity.ok(inventoryService.getAllActiveProduct());
     }
 

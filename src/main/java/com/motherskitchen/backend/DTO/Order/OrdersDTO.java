@@ -21,6 +21,7 @@ public class OrdersDTO {
     private String status;
     private LocalDate deliveryDate;
     private String Notes;
+    private String payment ;
     private List<OrderItemDTO> items;
     private Address address;
 }

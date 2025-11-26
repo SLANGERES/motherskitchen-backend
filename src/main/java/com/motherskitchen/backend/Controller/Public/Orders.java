@@ -72,20 +72,12 @@ public class Orders {
             return ResponseEntity.ok(orderService.getALlOrdersByStatus(status.toUpperCase()));
         }
     }
-    @PostMapping("/status/{id}/accept")
-    public ResponseEntity<String>acceptOrder(@PathVariable("id")String id){
+    @PostMapping("/status/{id}")
+    public ResponseEntity<String>completeOrder(@PathVariable("id")String id,@RequestParam String status){
 
-        return orderService.acceptOrderById(id)
-                ? ResponseEntity.ok("Order status changed to accepted")
-                : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Unable to accept order");
-    }
-    @PostMapping("/status/{id}/complete")
-    public ResponseEntity<String>completeOrder(@PathVariable("id")String id){
-
-        return orderService.completeOrderById(id)
+        return orderService.updateOrderStatus(id,status)
                 ? ResponseEntity.ok("Order status changed to completed")
                 : ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body("Unable to chnage status");
+                .body("Unable to change status");
     }
 }

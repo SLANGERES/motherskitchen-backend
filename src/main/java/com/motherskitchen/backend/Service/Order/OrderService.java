@@ -40,6 +40,7 @@ public class OrderService {
                 .totalAmount(order.getTotal())
                 .status(order.getStatus())
                 .deliveryDate(order.getDeliveryDate())
+                .payment(order.getPayment())
                 .items(
                         order.getItems().stream()
                                 .map(item -> OrderItemDTO.builder()
@@ -103,6 +104,7 @@ public class OrderService {
                 .items(orderItems)
                 .deliveryDate(request.getDeliveryDate())
                 .status("PENDING")
+                .payment(request.getPayment())
                 .total(total)
                 .Notes(request.getNotes())
                 .build();
@@ -144,7 +146,7 @@ public class OrderService {
     /**
      * Private helper method to update order status by ID.
      */
-    private boolean updateOrderStatus(String id, String newStatus) {
+    public boolean updateOrderStatus(String id, String newStatus) {
         UUID orderUuid;
         try {
             orderUuid = UUID.fromString(id);
@@ -162,13 +164,5 @@ public class OrderService {
         orders.setStatus(newStatus);
         orderRepository.save(orders);
         return true;
-    }
-
-    public boolean acceptOrderById(String id){
-        return updateOrderStatus(id, "ACCEPT");
-    }
-
-    public boolean completeOrderById(String id){
-        return updateOrderStatus(id, "COMPLETE");
     }
 }

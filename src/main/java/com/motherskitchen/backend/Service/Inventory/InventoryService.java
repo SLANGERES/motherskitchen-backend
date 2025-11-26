@@ -56,6 +56,7 @@ public class InventoryService {
                         .price(p.getPrice())
                         .category(p.getCategory())
                         .image(p.getImageUrl())
+                        .isActive(p.isActive())
                         .build()
         ).toList();
     }
@@ -90,6 +91,7 @@ public class InventoryService {
                         .price(p.getPrice())
                         .category(p.getCategory())
                         .image(p.getImageUrl())
+                        .isActive(p.isActive())
                         .build()
         ).toList();
     }
@@ -105,6 +107,7 @@ public class InventoryService {
                         .price(p.getPrice())
                         .category(category)
                         .image(p.getImageUrl())
+                        .isActive(p.isActive())
                         .build()
                 ).toList();
     }
@@ -125,6 +128,7 @@ public class InventoryService {
                 .image(p.getImageUrl())
                 .description(p.getDescription())
                 .category(p.getCategory())
+                .isActive(p.isActive())
                 .build();
 
         return Optional.of(product);

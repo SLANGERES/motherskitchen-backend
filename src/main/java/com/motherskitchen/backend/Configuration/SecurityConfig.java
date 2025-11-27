@@ -34,9 +34,10 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 
+    // Faster bcrypt for dev (6), increase to 8–10 for production
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new BCryptPasswordEncoder(6);
     }
 
     @Bean
@@ -46,35 +47,37 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // Permit OPTIONS globally (CRITICAL!)
+
+                        // Allow OPTIONS for all (important for browsers)
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public endpoints
-                        .requestMatchers("/api/v1/auth/signup",
+                        // Public APIs
+                        .requestMatchers(
+                                "/api/v1/auth/signup",
                                 "/api/v1/auth/login",
                                 "/api/v1/party-order",
                                 "/api/v1/health",
-                        "/api/v1/inventory/**"
+                                "/api/v1/inventory/active",
+                                "/api/v1/inventory/top-product"
                         ).permitAll()
 
-                        // Inventory endpoints – require authentication
-//                        .requestMatchers("/api/v1/inventory/**").authenticated()
-
-                        // Admin ONLY endpoints
+                        // Admin-only routes
                         .requestMatchers(
                                 "/api/v1/inventory/add",
                                 "/api/v1/inventory/delete/**",
                                 "/api/v1/inventory/deactivate/**",
                                 "/api/v1/inventory/activate/**",
                                 "/api/v1/orders/all-orders",
-                                "/api/v1/orders/status/**"
+                                "/api/v1/orders/status/**",
+                                "/api/v1/admin/**"
                         ).hasRole("ADMIN")
-                        .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
-                        // fallback rule
+                        // Everything else needs authentication
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // Register JWT filter before UsernamePasswordAuthenticationFilter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -95,7 +98,11 @@ public class SecurityConfig {
         ));
 
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("*"));
+
+        // Important fixes
+        configuration.addAllowedHeader("*");
+        configuration.addAllowedMethod("*");
+
         configuration.setAllowCredentials(true);
         configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
         configuration.setMaxAge(3600L);
@@ -104,5 +111,4 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
-
 }

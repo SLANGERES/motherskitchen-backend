@@ -8,10 +8,14 @@ import com.motherskitchen.backend.DTO.User.UserDTO;
 import com.motherskitchen.backend.Security.Jwt.AuthUtil;
 import com.motherskitchen.backend.Service.User.UserService;
 import com.motherskitchen.backend.Service.Email.EmailService;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,38 +25,54 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
+import java.util.HashMap;
+import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class User {
+
     private final UserService userService;
     private final AuthUtil authUtil;
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
 
+    // ---------------------- SIGNUP ----------------------
     @PostMapping("/signup")
-    public ResponseEntity<UUID>signUp(@Valid @RequestBody SignUpDTO request){
-        UserDTO user=userService.signup(request);
+    public ResponseEntity<Map<String, Object>> signUp(@Valid @RequestBody SignUpDTO request) {
 
-        AccountEmailCreationDTO EmailData= AccountEmailCreationDTO.builder()
+        UserDTO user = userService.signup(request);
+
+        // Send welcome mail
+        AccountEmailCreationDTO emailData = AccountEmailCreationDTO.builder()
                 .to(user.getEmail())
                 .name(user.getName())
                 .uid(user.getId().toString())
                 .email(user.getEmail())
                 .build();
-        emailService.accountCreation(EmailData);
-        return new ResponseEntity<>(user.getId(), HttpStatus.CREATED);
+
+        emailService.accountCreation(emailData);
+
+        log.info("User created successfully UID={}", user.getId());
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("success", true);
+        response.put("message", "Signup successful");
+        response.put("userId", user.getId());
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
+    // ---------------------- LOGIN ----------------------
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginDTO request,
             HttpServletResponse response) {
 
         try {
-            // 1️⃣ Authenticate
+            // Authenticate user
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
                             request.getEmail(),
@@ -62,13 +82,13 @@ public class User {
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
-            // 2️⃣ Load full user info
+            // Load full user from DB
             UserDTO user = userService.getUserByEmail(userDetails.getUsername());
 
-            // 3️⃣ Generate JWT
+            // Generate JWT
             String jwt = authUtil.generateAccessToken(user);
 
-            // 4️⃣ Set HttpOnly Cookie
+            // HttpOnly cookie
             Cookie cookie = new Cookie("token", jwt);
             cookie.setHttpOnly(true);
             cookie.setSecure(false);
@@ -76,30 +96,31 @@ public class User {
             cookie.setMaxAge(7 * 24 * 60 * 60);
             response.addCookie(cookie);
 
-            // 5️⃣ Build Response
-            LoginResponse loginResponse = LoginResponse.builder()
-                    .token(jwt)
-                    .role(user.getRole()).build();
+            log.info("User logged in successfully UID={}", user.getId());
 
-            // 6️⃣ Return JSON
-            return new ResponseEntity<>(loginResponse,HttpStatus.OK);
+            return ResponseEntity.ok(
+                    LoginResponse.builder()
+                            .token(jwt)
+                            .role(user.getRole())
+                            .build()
+            );
 
         } catch (Exception e) {
+            log.warn("Login failed for email={}", request.getEmail());
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(new LoginResponse(null, "INVALID"));
         }
     }
+
+    // ---------------------- PROFILE ----------------------
     @GetMapping("/me")
     public ResponseEntity<UserDTO> profile(@AuthenticationPrincipal UserDetails userDetails) {
-        // If no authenticated user, Spring Security will return 401 automatically
+
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // Fetch the full user from the database using the email
-        String email = userDetails.getUsername();
-        UserDTO user = userService.getUserByEmail(email);
+        UserDTO user = userService.getUserByEmail(userDetails.getUsername());
         return ResponseEntity.ok(user);
     }
-
 }

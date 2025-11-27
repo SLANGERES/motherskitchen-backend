@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Value("${master.admin.email}")
     private String masterAdminEmail;
@@ -23,32 +24,28 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private String masterAdminPassword;
 
     @Value("${master.admin.role}")
-    private String masterAdminRole;  // e.g., ADMIN
+    private String masterAdminRole;   // ADMIN
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        // 1️⃣ Check master admin
-
+        // MASTER ADMIN HANDLING
         if (email.equalsIgnoreCase(masterAdminEmail)) {
-
             return org.springframework.security.core.userdetails.User
-                    .builder()
-                    .username(masterAdminEmail)
-                    .password(masterAdminPassword)
-                    .roles(masterAdminRole)  // ROLE_ADMIN
+                    .withUsername(masterAdminEmail)
+                    .password(masterAdminPassword)   // MUST BE ENCODED
+                    .roles(masterAdminRole)          // e.g., ADMIN
                     .build();
         }
 
-        // 2️⃣ Load DB user
-        com.motherskitchen.backend.Models.User.User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+        // NORMAL USER
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
-                .builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole())
+                .withUsername(user.getEmail())
+                .password(user.getPassword())       // MUST BE ENCODED IN DB
+                .roles(user.getRole())   // ensure it becomes "ADMIN"
                 .build();
     }
 }

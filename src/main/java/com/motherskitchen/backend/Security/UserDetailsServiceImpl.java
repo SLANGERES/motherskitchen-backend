@@ -33,18 +33,21 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         if (email.equalsIgnoreCase(masterAdminEmail)) {
             return org.springframework.security.core.userdetails.User
                     .withUsername(masterAdminEmail)
-                    .password(masterAdminPassword)  // already encoded
-                    .roles(masterAdminRole)
+                    .password(masterAdminPassword)   // already encoded or stored encoded
+                    .roles(masterAdminRole)          // e.g., ADMIN
                     .build();
         }
 
+        // NORMAL USER
         User dbUser = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found: " + email)
+                );
 
         return org.springframework.security.core.userdetails.User
                 .withUsername(dbUser.getEmail())
-                .password(dbUser.getPassword())  // already encoded in DB
-                .roles(dbUser.getRole())
+                .password(dbUser.getPassword())      // already encoded in DB
+                .roles(dbUser.getRole())             // USER / ADMIN
                 .build();
     }
 }

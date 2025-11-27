@@ -22,23 +22,27 @@ import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
-@RequiredArgsConstructor
+//@RequiredArgsConstructor // NO LONGER NEEDED OR HARMFUL IF CONSTRUCTOR IS REMOVED
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthFilter;
+    // 💡 REMOVE CONSTRUCTOR INJECTION: private final JwtAuthenticationFilter jwtAuthFilter;
 
+    // Authentication Manager
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
+    // Password Encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(10);
+        return new BCryptPasswordEncoder(8);
     }
 
+    // Security Filter Chain
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    // 💡 INJECT JWT FILTER AS METHOD PARAMETER
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthFilter) throws Exception {
 
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -47,7 +51,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // PUBLIC ROUTES
+                        // 💡 PUBLIC ROUTES
                         .requestMatchers(
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/login",
@@ -57,7 +61,7 @@ public class SecurityConfig {
                                 "/api/v1/inventory/top-product"
                         ).permitAll()
 
-                        // ADMIN ONLY (ROLE_ADMIN)
+                        // 💡 ADMIN ROUTES
                         .requestMatchers(
                                 "/api/v1/inventory/add",
                                 "/api/v1/inventory/delete/**",
@@ -68,18 +72,22 @@ public class SecurityConfig {
                                 "/api/v1/admin/**"
                         ).hasRole("ADMIN")
 
+                        // Everything else requires login
                         .anyRequest().authenticated()
                 )
 
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                // No session → JWT only
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
 
-                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+                // JWT Before UsernamePasswordAuthenticationFilter
+                .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class); // Use injected parameter
 
         return http.build();
     }
 
+    // CORS Configuration
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
@@ -89,6 +97,7 @@ public class SecurityConfig {
 
         config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:*",
+                "http://localhost:3000",
                 "https://motherskitchen.se",
                 "https://www.motherskitchen.se",
                 "https://api.motherskitchen.se"
@@ -100,7 +109,6 @@ public class SecurityConfig {
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
-
         return source;
     }
 }

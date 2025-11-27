@@ -89,7 +89,7 @@ public class User {
             UserDTO user = userService.getUserByEmail(userDetails.getUsername());
 
             // Generate JWT
-            String jwt = authUtil.generateAccessToken(user);
+            String jwt = authUtil.generateToken(user);
 
             // HttpOnly cookie
             Cookie cookie = new Cookie("token", jwt);

@@ -1,7 +1,6 @@
 package com.motherskitchen.backend.Security;
 
 import com.motherskitchen.backend.Security.Jwt.AuthUtil;
-import com.motherskitchen.backend.Security.UserDetailsServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -24,7 +23,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final AuthUtil authUtil;
     private final UserDetailsServiceImpl userDetailsService;
 
-    // All PUBLIC routes → no JWT checking
+    // PUBLIC APIs
     private static final Set<String> PUBLIC_PATHS = Set.of(
             "/api/v1/auth/login",
             "/api/v1/auth/signup",
@@ -32,7 +31,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             "/api/v1/party-order",
             "/api/v1/inventory/active",
             "/api/v1/inventory/top-product"
-
     );
 
     public JwtAuthenticationFilter(AuthUtil authUtil, UserDetailsServiceImpl userDetailsService) {
@@ -44,81 +42,74 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(
             HttpServletRequest request,
             HttpServletResponse response,
-            FilterChain filterChain) throws ServletException, IOException {
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String path = request.getRequestURI();
 
-        // 1️⃣ Bypass all public routes
-        if (isPublicPath(path)) {
+        // PUBLIC ROUTES SKIPPED
+        if (isPublic(path)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String jwt = extractToken(request);
-        if (jwt == null) {
+        String token = extractToken(request);
+        if (token == null) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        String userEmail = null;
+        String email = null;
 
         try {
-            Claims claims = authUtil.getClaimsFromToken(jwt);
-            userEmail = claims.getSubject();
+            Claims claims = authUtil.getClaimsFromToken(token);
+            email = claims.getSubject();
         } catch (Exception e) {
-            System.err.println("JWT parsing failed: " + e.getMessage());
+            System.out.println("Invalid Token: " + e.getMessage());
         }
 
-        // 3️⃣ Authenticate if valid
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+        if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-            try {
-                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-                if (authUtil.validateToken(jwt)) {
+            if (authUtil.validateToken(token)) {
 
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(
-                                    userDetails,
-                                    null,
-                                    userDetails.getAuthorities()
-                            );
+                UsernamePasswordAuthenticationToken auth =
+                        new UsernamePasswordAuthenticationToken(
+                                userDetails,
+                                null,
+                                userDetails.getAuthorities()
+                        );
 
-                    authToken.setDetails(
-                            new WebAuthenticationDetailsSource().buildDetails(request)
-                    );
+                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-
-            } catch (Exception e) {
-                System.err.println("Error loading user details: " + e.getMessage());
+                SecurityContextHolder.getContext().setAuthentication(auth);
             }
         }
 
         filterChain.doFilter(request, response);
     }
 
-    // Helper: Skip JWT for these routes
-    private boolean isPublicPath(String path) {
+    private boolean isPublic(String path) {
+
         if (PUBLIC_PATHS.contains(path)) return true;
-        // Entire inventory public
+
+        // Entire inventory public except admin APIs
         if (path.startsWith("/api/v1/inventory")) return true;
+
         return false;
     }
 
-    // Extract token from header or cookie
     private String extractToken(HttpServletRequest request) {
-        String authHeader = request.getHeader("Authorization");
 
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            return authHeader.substring(7);
-        }
+        String header = request.getHeader("Authorization");
+
+        if (header != null && header.startsWith("Bearer "))
+            return header.substring(7);
 
         // Check cookies
-        Cookie[] cookies = request.getCookies();
-        if (cookies != null) {
-            for (Cookie c : cookies) {
+        if (request.getCookies() != null) {
+            for (Cookie c : request.getCookies()) {
                 if ("token".equals(c.getName())) {
                     return c.getValue();
                 }

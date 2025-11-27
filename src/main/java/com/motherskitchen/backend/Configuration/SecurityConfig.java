@@ -1,7 +1,6 @@
 package com.motherskitchen.backend.Configuration;
 
 import com.motherskitchen.backend.Security.JwtAuthenticationFilter;
-import com.motherskitchen.backend.Security.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -27,23 +26,17 @@ import java.util.Arrays;
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthFilter;
-    private final UserDetailsServiceImpl userDetailsService;
 
-    // AuthenticationManager bean
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
 
-    // Password encoder
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(8);
+        return new BCryptPasswordEncoder(10);
     }
 
-    // ----------------------------------------------------------------------
-    // SECURITY FILTER CHAIN
-    // ----------------------------------------------------------------------
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
@@ -52,21 +45,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
 
                 .authorizeHttpRequests(auth -> auth
-
-                        // Allow OPTIONS preflight requests
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                        // Public routes
+                        // PUBLIC ROUTES
                         .requestMatchers(
                                 "/api/v1/auth/signup",
                                 "/api/v1/auth/login",
-                                "/api/v1/party-order",
                                 "/api/v1/health",
+                                "/api/v1/party-order",
                                 "/api/v1/inventory/active",
                                 "/api/v1/inventory/top-product"
                         ).permitAll()
 
-                        // Admin-only routes
+                        // ADMIN ONLY (ROLE_ADMIN)
                         .requestMatchers(
                                 "/api/v1/inventory/add",
                                 "/api/v1/inventory/delete/**",
@@ -77,51 +68,38 @@ public class SecurityConfig {
                                 "/api/v1/admin/**"
                         ).hasRole("ADMIN")
 
-                        // Everything else requires login
                         .anyRequest().authenticated()
                 )
 
-                // No session — using JWT
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
 
-                // Register JWT filter before username/password filter
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ----------------------------------------------------------------------
-    // CORS CONFIGURATION (FULLY FIXED)
-    // ----------------------------------------------------------------------
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
 
-        CorsConfiguration configuration = new CorsConfiguration();
+        CorsConfiguration config = new CorsConfiguration();
 
-        // MUST be first
-        configuration.setAllowCredentials(true);
+        config.setAllowCredentials(true);
 
-        // Allow your domain, subdomain & locals
-        configuration.setAllowedOriginPatterns(Arrays.asList(
+        config.setAllowedOriginPatterns(Arrays.asList(
                 "http://localhost:*",
                 "https://motherskitchen.se",
                 "https://www.motherskitchen.se",
                 "https://api.motherskitchen.se"
         ));
 
-        // Which headers are allowed
-        configuration.setAllowedHeaders(Arrays.asList("*"));
-
-        // Allowed HTTP methods
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-
-        // Expose headers to JS
-        configuration.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
-
-        configuration.setMaxAge(3600L);
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
+        config.setAllowedHeaders(Arrays.asList("*"));
+        config.setExposedHeaders(Arrays.asList("Authorization", "Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
 
         return source;
     }

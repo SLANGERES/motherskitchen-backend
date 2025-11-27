@@ -7,8 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -24,28 +24,27 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private String masterAdminPassword;
 
     @Value("${master.admin.role}")
-    private String masterAdminRole;   // ADMIN
+    private String masterAdminRole;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        // MASTER ADMIN HANDLING
+        // MASTER ADMIN
         if (email.equalsIgnoreCase(masterAdminEmail)) {
             return org.springframework.security.core.userdetails.User
                     .withUsername(masterAdminEmail)
-                    .password(masterAdminPassword)   // MUST BE ENCODED
-                    .roles(masterAdminRole)          // e.g., ADMIN
+                    .password(masterAdminPassword)  // already encoded
+                    .roles(masterAdminRole)
                     .build();
         }
 
-        // NORMAL USER
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User dbUser = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
         return org.springframework.security.core.userdetails.User
-                .withUsername(user.getEmail())
-                .password(user.getPassword())       // MUST BE ENCODED IN DB
-                .roles(user.getRole())   // ensure it becomes "ADMIN"
+                .withUsername(dbUser.getEmail())
+                .password(dbUser.getPassword())  // already encoded in DB
+                .roles(dbUser.getRole())
                 .build();
     }
 }

@@ -29,6 +29,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
         // 1️⃣ Check master admin
+
         if (email.equalsIgnoreCase(masterAdminEmail)) {
 
             return org.springframework.security.core.userdetails.User

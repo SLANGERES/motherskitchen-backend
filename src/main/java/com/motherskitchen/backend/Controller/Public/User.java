@@ -70,6 +70,9 @@ public class User {
     public ResponseEntity<LoginResponse> login(
             @Valid @RequestBody LoginDTO request,
             HttpServletResponse response) {
+        //DEBUG
+        log.info("Login attempt for email: {}", request.getEmail());
+        log.info("Login attempt for email: {}", request.getPassword());
 
         try {
             // Authenticate user

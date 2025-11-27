@@ -8,6 +8,7 @@ import com.motherskitchen.backend.Repository.UserRepository;
 import com.motherskitchen.backend.Security.UserDetailsServiceImpl;
 import jakarta.validation.constraints.Null;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -16,7 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.UUID;
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -61,6 +62,8 @@ public class UserService {
                 .email(user.getEmail())
                 .phoneNo(user.getPhoneNo())
                 .build();
+
+        log.info("Password matches? {}", passwordEncoder.matches(request.getPassword(), user.getPassword()));
 
         // Compare raw password with hashed password
         if(!passwordEncoder.matches(request.getPassword(), user.getPassword())){

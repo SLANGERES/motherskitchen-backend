@@ -90,10 +90,12 @@ public class User {
 
             // HttpOnly cookie
             Cookie cookie = new Cookie("token", jwt);
+            cookie.setSecure(true);
             cookie.setHttpOnly(true);
-            cookie.setSecure(false);
             cookie.setPath("/");
+            cookie.setDomain("motherskitchen.se");
             cookie.setMaxAge(7 * 24 * 60 * 60);
+            cookie.setAttribute("SameSite", "None");
             response.addCookie(cookie);
 
             log.info("User logged in successfully UID={}", user.getId());

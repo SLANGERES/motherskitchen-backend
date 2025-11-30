@@ -1,9 +1,11 @@
 package com.motherskitchen.backend.DTO.Inventory;
 
+import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Getter
@@ -28,4 +30,5 @@ public class InventoryDTO {
 
     private String imageURL;
     private String imageKey;
+
 }

@@ -14,5 +14,5 @@ public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
     List<Inventory> findByCategoryAndIsActiveTrue(String category, Sort sort);
     List<Inventory> findByIsActiveFalse(Sort sort);
     List<Inventory> findByIsActiveTrue(Sort sort);
-    List<Inventory> findTop3By();
+    List<Inventory> findTop3ByOrderByCreatedAtDesc();
 }

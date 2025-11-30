@@ -112,7 +112,7 @@ public class InventoryService {
                 ).toList();
     }
     public List<ProductDTO>getTop3Product(){
-        List<Inventory> top3=inventoryRepository.findTop3By();
+        List<Inventory> top3=inventoryRepository.findTop3ByOrderByCreatedAtDesc();
         return top3.stream().map(p->
                 ProductDTO.builder()
                         .id(p.getId())

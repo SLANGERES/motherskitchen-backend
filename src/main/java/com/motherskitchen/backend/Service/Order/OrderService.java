@@ -40,6 +40,7 @@ public class OrderService {
                 .phone(order.getPhone())
                 .totalAmount(order.getTotal())
                 .status(order.getStatus())
+                .ordersType(order.getOrderType())
                 .deliveryDate(order.getDeliveryDay())
                 .payment(order.getPayment())
                 .items(

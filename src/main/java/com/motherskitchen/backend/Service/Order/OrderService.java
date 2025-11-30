@@ -12,7 +12,6 @@ import com.motherskitchen.backend.Repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,7 +23,6 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final InventoryRepository itemRepository;
-
 
     private String fetchItemName(UUID itemId) {
         return itemRepository.findById(itemId)
@@ -53,35 +51,45 @@ public class OrderService {
                                         .build()
                                 ).toList()
                 )
-                .address(
-                        Address.builder()
-                                .streetAddress(order.getAddress().getStreetAddress())
-                                .city(order.getAddress().getCity())
-                                .postalcode(order.getAddress().getPostalcode())
-                                .build()
-                )
+                .address(order.getAddress() == null ? null : Address.builder()
+                        .streetAddress(order.getAddress().getStreetAddress())
+                        .city(order.getAddress().getCity())
+                        .postalcode(order.getAddress().getPostalcode())
+                        .build())
                 .Notes(order.getNotes())
                 .build();
     }
 
 
-    /**
-     * Creates a new order. NOTE: This service assumes there is infinite inventory
-     * since the Inventory model does not track stock quantity.
-     */
+    // ---------------------------------------------------
+    //                    CREATE ORDER
+    // ---------------------------------------------------
+
     @Transactional
     public OrdersDTO createOrder(OrdersCreateDTO request) {
 
-        Address address = Address.builder()
-                .streetAddress(request.getAddress().getStreetAddress())
-                .city(request.getAddress().getCity())
-                .postalcode(request.getAddress().getPostalcode())
-                .build();
+        // ---- HANDLE ADDRESS ----
+        Address address = null;
 
+        if ("Delivery".equalsIgnoreCase(request.getOrderType())) {
+
+            if (request.getAddress() == null) {
+                throw new RuntimeException("Address is required for Delivery orders");
+            }
+
+            address = Address.builder()
+                    .streetAddress(request.getAddress().getStreetAddress())
+                    .city(request.getAddress().getCity())
+                    .postalcode(request.getAddress().getPostalcode())
+                    .build();
+        }
+
+
+        // ---- ITEMS ----
         List<OrderItem> orderItems = request.getItems().stream().map(i -> {
 
             Inventory item = itemRepository.findById(i.getItemId())
-                    .orElseThrow(() -> new RuntimeException("Item not found with ID: " + i.getItemId()));
+                    .orElseThrow(() -> new RuntimeException("Item not found: " + i.getItemId()));
 
             return OrderItem.builder()
                     .itemId(item.getId())
@@ -96,21 +104,20 @@ public class OrderService {
                 .mapToDouble(oi -> oi.getPrice() * oi.getQuantity())
                 .sum();
 
-        // Add delivery charge from frontend (30 or 0)
+        // Add delivery charge from frontend
         double finalTotal = itemsTotal + request.getDeliveryCharge();
 
+
+        // ---- ORDER ENTITY ----
         Orders order = Orders.builder()
                 .name(request.getName())
                 .email(request.getEmail())
                 .phone(request.getPhone())
                 .address(address)
                 .items(orderItems)
-
-                // UPDATED FIELDS
-                .deliveryDay(request.getDay())          // Friday / Saturday / Sunday
-                .orderType(request.getOrderType())      // delivery / pickup
+                .deliveryDay(request.getDay())            // Friday/Sat/Sun
+                .orderType(request.getOrderType())        // Pickup / Delivery
                 .deliveryCharge(request.getDeliveryCharge())
-
                 .status("PENDING")
                 .payment(request.getPayment())
                 .total(finalTotal)
@@ -125,57 +132,59 @@ public class OrderService {
     }
 
 
-    // --- Order Retrieval Methods ---
+    // ---------------------------------------------------
+    //               ORDER RETRIEVAL METHODS
+    // ---------------------------------------------------
 
-    public List<OrdersDTO> getALlOrders(){
+    public List<OrdersDTO> getALlOrders() {
         return orderRepository.findAll()
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
     }
-    public List<OrdersDTO> getALlOrdersByStatus(String status){
+
+    public List<OrdersDTO> getALlOrdersByStatus(String status) {
         return orderRepository.findByStatus(status)
                 .stream()
                 .map(this::mapToDTO)
                 .toList();
     }
 
-    public Optional<OrdersDTO> getOrderById(String uid){
+    public Optional<OrdersDTO> getOrderById(String uid) {
         try {
             Optional<Orders> tempOrder = orderRepository.findById(UUID.fromString(uid));
             return tempOrder.map(this::mapToDTO);
-        } catch (IllegalArgumentException e) {
-            // Handle malformed UUID string gracefully
+        } catch (Exception e) {
             return Optional.empty();
         }
     }
 
-    // --- Order Status Update Methods ---
 
-    /**
-     * Private helper method to update order status by ID.
-     */
+    // ---------------------------------------------------
+    //               ORDER STATUS + DELETE
+    // ---------------------------------------------------
+
     public boolean updateOrderStatus(String id, String newStatus) {
         UUID orderUuid;
+
         try {
             orderUuid = UUID.fromString(id);
         } catch (IllegalArgumentException e) {
-            // Invalid UUID format provided
             return false;
         }
 
         Optional<Orders> tempOrder = orderRepository.findById(orderUuid);
-        if(tempOrder.isEmpty()){
-            return false;
-        }
+        if (tempOrder.isEmpty()) return false;
 
         Orders orders = tempOrder.get();
         orders.setStatus(newStatus);
+
         orderRepository.save(orders);
         return true;
     }
-    public boolean DeleteOrder(String id){
-        if(!orderRepository.existsById(UUID.fromString(id))){
+
+    public boolean DeleteOrder(String id) {
+        if (!orderRepository.existsById(UUID.fromString(id))) {
             return false;
         }
         orderRepository.deleteById(UUID.fromString(id));

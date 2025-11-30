@@ -19,7 +19,7 @@ public class OrdersDTO {
     private String phone;
     private Double totalAmount;
     private String status;
-    private LocalDate deliveryDate;
+    private String deliveryDate;
     private String Notes;
     private String payment ;
     private List<OrderItemDTO> items;

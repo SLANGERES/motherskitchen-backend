@@ -101,9 +101,6 @@ public class EmailHTML {
     }
     public static String orderConfirmation(OrdersDTO order, String customerName) {
 
-        String orderDate = order.getDeliveryDate() != null
-                ? order.getDeliveryDate().format(DateTimeFormatter.ofPattern("MMM dd, yyyy"))
-                : "N/A";
 
         StringBuilder itemsHtml = getStringBuilder(order);
 
@@ -199,7 +196,7 @@ public class EmailHTML {
                 template,
                 customerName,
                 order.getId().toString(),
-                orderDate,
+                order.getDeliveryDate(),
                 order.getTotalAmount(),
                 itemsHtml.toString(),
                 address.getStreetAddress(),

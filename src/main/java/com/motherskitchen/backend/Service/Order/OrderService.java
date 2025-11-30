@@ -40,7 +40,7 @@ public class OrderService {
                 .phone(order.getPhone())
                 .totalAmount(order.getTotal())
                 .status(order.getStatus())
-                .deliveryDate(order.getDeliveryDate())
+                .deliveryDate(order.getDeliveryDay())
                 .payment(order.getPayment())
                 .items(
                         order.getItems().stream()
@@ -79,23 +79,24 @@ public class OrderService {
 
         List<OrderItem> orderItems = request.getItems().stream().map(i -> {
 
-            // Fetch item to ensure it exists and get its current price
             Inventory item = itemRepository.findById(i.getItemId())
                     .orElseThrow(() -> new RuntimeException("Item not found with ID: " + i.getItemId()));
-
-            // NO INVENTORY CHECK OR DEDUCTION HERE (as per your request)
 
             return OrderItem.builder()
                     .itemId(item.getId())
                     .quantity(i.getQuantity())
-                    .price(item.getPrice()) // Use the current price from the Inventory model
+                    .price(item.getPrice())
                     .build();
 
         }).toList();
 
-        double total = orderItems.stream()
+        // Calculate items total
+        double itemsTotal = orderItems.stream()
                 .mapToDouble(oi -> oi.getPrice() * oi.getQuantity())
                 .sum();
+
+        // Add delivery charge from frontend (30 or 0)
+        double finalTotal = itemsTotal + request.getDeliveryCharge();
 
         Orders order = Orders.builder()
                 .name(request.getName())
@@ -103,19 +104,25 @@ public class OrderService {
                 .phone(request.getPhone())
                 .address(address)
                 .items(orderItems)
-                .deliveryDate(request.getDeliveryDate())
+
+                // UPDATED FIELDS
+                .deliveryDay(request.getDay())          // Friday / Saturday / Sunday
+                .orderType(request.getOrderType())      // delivery / pickup
+                .deliveryCharge(request.getDeliveryCharge())
+
                 .status("PENDING")
                 .payment(request.getPayment())
-                .total(total)
-                .Notes(request.getNotes())
+                .total(finalTotal)
+                .notes(request.getNotes())
                 .build();
 
-        // CRITICAL FIX: Set parent for bidirectional mapping
+        // Set relation for JPA
         orderItems.forEach(oi -> oi.setOrder(order));
 
         Orders savedOrder = orderRepository.save(order);
         return mapToDTO(savedOrder);
     }
+
 
     // --- Order Retrieval Methods ---
 

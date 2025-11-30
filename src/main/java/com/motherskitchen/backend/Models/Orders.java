@@ -22,23 +22,25 @@ public class Orders {
     private UUID id;
 
     private String name;
-
     private String email;
-
     private String phone;
 
     private Double total;
 
     private String status;
 
-    private LocalDate deliveryDate;
+    private String deliveryDay;     // Friday / Saturday / Sunday
 
-    private String Notes;
+    private String notes;
+
+    private String orderType;       // delivery / pickup
+
+    private int deliveryCharge;     // 30 or 0
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> items;
 
-    private String payment ;
+    private String payment;
 
     @Embedded
     private Address address;

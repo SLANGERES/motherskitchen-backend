@@ -3,27 +3,52 @@ package com.motherskitchen.backend.Service.Email;
 import com.motherskitchen.backend.DTO.Email.AccountEmailCreationDTO;
 import com.motherskitchen.backend.DTO.Email.OrderEmail;
 import com.motherskitchen.backend.DTO.Party.PartyOrderRequest;
-import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.*;
 
 @Service
 public class EmailService {
 
-    @Autowired
-    private JavaMailSender mailSender;
+    @Value("${brevo.api.key}")
+    private String brevoApiKey;
 
+    @Value("${owner.email}")
+    private String ownerEmail;
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    private static final String BREVO_URL = "https://api.brevo.com/v3/smtp/email";
+
+    private void sendHtmlEmail(String to, String subject, String htmlContent) {
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("sender", Map.of("name", "Mother's Kitchen", "email", "support@motherskitchen.se"));
+        body.put("to", List.of(Map.of("email", to)));
+        body.put("subject", subject);
+        body.put("htmlContent", htmlContent);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("api-key", brevoApiKey);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+        restTemplate.postForObject(BREVO_URL, entity, String.class);
+    }
+
+    // --------------------------
+    // ACCOUNT CREATION EMAIL
+    // --------------------------
     @Async
     public void accountCreation(AccountEmailCreationDTO request) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            String subject = "Welcome to Mothers Kitchen!";
-
             String html = EmailHTML.accountCreation(
                     request.getName(),
                     request.getEmail(),
@@ -31,71 +56,52 @@ public class EmailService {
                     "https://www.motherskitchen.se/"
             );
 
-            helper.setFrom("support@motherskitchen.se");
-            helper.setTo(request.getTo());
-            helper.setSubject(subject);
-            helper.setText(html, true); // true = HTML email
-
-            mailSender.send(message);
-            System.out.println("---------> send account creation mail: " + request.getEmail());
-
+            sendHtmlEmail(request.getTo(), "Welcome to Mother's Kitchen!", html);
+            System.out.println("-------> Account creation email sent to: " + request.getEmail());
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
+
+    // --------------------------
+    // ORDER CONFIRMATION EMAIL
+    // --------------------------
     @Async
     public void orderConform(OrderEmail request) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            String subject = "Order Confirmation – Mother's Kitchen";
-
             String html = EmailHTML.orderConfirmation(
                     request.getOrder(),
                     request.getName()
             );
 
-            helper.setFrom("support@motherskitchen.se");
-            helper.setTo(request.getEmail());
-            helper.setSubject(subject);
-            helper.setText(html, true); // true = HTML email
-
-            mailSender.send(message);
-            System.out.println("---------> send order conform mail to: " + request.getEmail());
-
+            sendHtmlEmail(request.getEmail(), "Order Confirmation – Mother's Kitchen", html);
+            System.out.println("-------> Order confirmation email sent to: " + request.getEmail());
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
+
+    // --------------------------
+    // PARTY ORDER EMAIL (to OWNER)
+    // --------------------------
     @Async
     public void partyOrderEmail(PartyOrderRequest request) {
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            String subject = "Hi there is Party Order – Mother's Kitchen";
-
             String html = EmailHTML.partyOrderEmail(
                     request.getName(),
                     request.getEmail(),
                     request.getPhone(),
                     request.getDate(),
                     request.getGuests(),
+                    request.getVegNonVeg(),
                     request.getCombo(),
                     request.getMessage()
             );
 
-            helper.setFrom("support@motherskitchen.se");
-            helper.setTo("${owner.email}");
-            helper.setSubject(subject);
-            helper.setText(html, true); // true = HTML email
-
-            mailSender.send(message);
-            System.out.println("---------> send order conform mail to: " + "${owner.email}");
-
+            sendHtmlEmail(ownerEmail, "New Party Order – Mother's Kitchen", html);
+            System.out.println("-------> Party order email sent to owner: " + ownerEmail);
         } catch (Exception e) {
-            System.out.println(e);
+            e.printStackTrace();
         }
     }
 }

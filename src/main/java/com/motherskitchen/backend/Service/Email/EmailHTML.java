@@ -240,107 +240,111 @@ public class EmailHTML {
         return itemsHtml;
     }
     public static String partyOrderEmail(String name, String email, String phone, String date,
-                                         String guests, String combo, String message) {
+                                         String guests, String vegNonVeg, String combo, String message) {
 
         String template = """
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8" />
-            <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <title>Party Order Inquiry</title>
-        </head>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Party Order Inquiry</title>
+    </head>
 
-        <body style="margin:0; padding:0; background:#f8f8f8; font-family:Arial, sans-serif;">
-        
-        <table width="100%%" cellspacing="0" cellpadding="0" style="padding:20px;">
-            <tr>
-                <td align="center">
-                
-                    <table width="600" cellspacing="0" cellpadding="0"
-                           style="background:#fff; border-radius:10px; overflow:hidden; border:1px solid #eee;">
-                        
-                        <!-- HEADER -->
-                        <tr>
-                            <td style="background:#e17055; padding:35px; text-align:center;">
-                                <div style="font-size:45px;">🎉</div>
-                                <h1 style="color:#fff; margin:10px 0 0; font-size:28px;">
-                                    New Party Order Inquiry
-                                </h1>
-                                <p style="color:#fff; opacity:0.9; margin-top:8px;">
-                                    Mother's Kitchen – Party Catering
-                                </p>
-                            </td>
-                        </tr>
-                        
-                        <!-- BODY -->
-                        <tr>
-                            <td style="padding:35px;">
+    <body style="margin:0; padding:0; background:#f8f8f8; font-family:Arial, sans-serif;">
+    
+    <table width="100%%" cellspacing="0" cellpadding="0" style="padding:20px;">
+        <tr>
+            <td align="center">
+            
+                <table width="600" cellspacing="0" cellpadding="0"
+                       style="background:#fff; border-radius:10px; overflow:hidden; border:1px solid #eee;">
+                    
+                    <!-- HEADER -->
+                    <tr>
+                        <td style="background:#e17055; padding:35px; text-align:center;">
+                            <div style="font-size:45px;">🎉</div>
+                            <h1 style="color:#fff; margin:10px 0 0; font-size:28px;">
+                                New Party Order Inquiry
+                            </h1>
+                            <p style="color:#fff; opacity:0.9; margin-top:8px;">
+                                Mother's Kitchen – Party Catering
+                            </p>
+                        </td>
+                    </tr>
+                    
+                    <!-- BODY -->
+                    <tr>
+                        <td style="padding:35px;">
+                            
+                            <h2 style="font-size:22px; margin-bottom:10px; color:#333;">
+                                Hello Team,
+                            </h2>
+                            <p style="font-size:15px; color:#555; line-height:1.6;">
+                                A customer has submitted a new party order inquiry.<br>
+                                Here are the full details:
+                            </p>
+
+                            <!-- USER DETAILS -->
+                            <div style="background:#fff7e6; padding:20px; border-left:4px solid #ffa94d; border-radius:8px; margin:25px 0;">
+                                <h3 style="margin:0 0 15px; color:#333;">Customer Details</h3>
                                 
-                                <h2 style="font-size:22px; margin-bottom:10px; color:#333;">
-                                    Hello Team,
-                                </h2>
-                                <p style="font-size:15px; color:#555; line-height:1.6;">
-                                    A customer has submitted a new party order inquiry.  
-                                    Here are the full details:
+                                <table width="100%%" cellpadding="6" style="font-size:15px;">
+                                    <tr>
+                                        <td><strong>Name:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Email:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Phone:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Party Date:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Number of Guests:</strong></td>
+                                        <td align="right">%s people</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Veg / Non-Veg:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Selected Combo:</strong></td>
+                                        <td align="right">%s</td>
+                                    </tr>
+                                </table>
+                            </div>
+
+                            <!-- MESSAGE -->
+                            <h3 style="color:#333; margin-bottom:10px;">Customer Message</h3>
+                            <div style="background:#f2f2f2; padding:20px; border-radius:8px;">
+                                <p style="margin:0; font-size:14px; color:#555; line-height:1.6;">
+                                    %s
                                 </p>
+                            </div>
 
-                                <!-- USER DETAILS -->
-                                <div style="background:#fff7e6; padding:20px; border-left:4px solid #ffa94d; border-radius:8px; margin:25px 0;">
-                                    <h3 style="margin:0 0 15px; color:#333;">Customer Details</h3>
-                                    
-                                    <table width="100%%" cellpadding="6" style="font-size:15px;">
-                                        <tr>
-                                            <td><strong>Name:</strong></td>
-                                            <td align="right">%s</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Email:</strong></td>
-                                            <td align="right">%s</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Phone:</strong></td>
-                                            <td align="right">%s</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Party Date:</strong></td>
-                                            <td align="right">%s</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Number of Guests:</strong></td>
-                                            <td align="right">%s people</td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>Selected Combo:</strong></td>
-                                            <td align="right">%s</td>
-                                        </tr>
-                                    </table>
-                                </div>
+                            <p style="margin-top:25px; font-size:13px; color:#999; text-align:center;">
+                                © 2025 Mother's Kitchen Party Catering. All rights reserved.
+                            </p>
 
-                                <!-- MESSAGE -->
-                                <h3 style="color:#333; margin-bottom:10px;">Customer Message</h3>
-                                <div style="background:#f2f2f2; padding:20px; border-radius:8px;">
-                                    <p style="margin:0; font-size:14px; color:#555; line-height:1.6;">
-                                        %s
-                                    </p>
-                                </div>
+                        </td>
+                    </tr>
 
-                                <p style="margin-top:25px; font-size:13px; color:#999; text-align:center;">
-                                    © 2025 Mother's Kitchen Party Catering. All rights reserved.
-                                </p>
+                </table>
 
-                            </td>
-                        </tr>
+            </td>
+        </tr>
+    </table>
 
-                    </table>
-
-                </td>
-            </tr>
-        </table>
-
-        </body>
-        </html>
-        """;
+    </body>
+    </html>
+    """;
 
         return String.format(
                 template,
@@ -349,12 +353,9 @@ public class EmailHTML {
                 phone,
                 date,
                 guests,
+                vegNonVeg,
                 combo,
                 (message == null || message.isBlank()) ? "No additional message." : message
         );
     }
-
-
-
-}
-
+    }

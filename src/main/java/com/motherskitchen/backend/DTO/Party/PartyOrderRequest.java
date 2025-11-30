@@ -14,5 +14,6 @@ public class PartyOrderRequest {
     private String date;
     private String guests;
     private String combo;
+    private String vegNonVeg;
     private String message;
 }

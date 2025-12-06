@@ -101,96 +101,114 @@ public class EmailHTML {
     }
     public static String orderConfirmation(OrdersDTO order, String customerName) {
 
-
         StringBuilder itemsHtml = getStringBuilder(order);
 
         Address address = order.getAddress();
+        boolean isPickup = order.getOrderType().equalsIgnoreCase("PICKUP");
+
+        // Address text blocks for pickup or delivery
+        String line1;
+        String line2;
+        String line3;
+        String line4;
+
+        if (isPickup) {
+            line1 = "Pickup Order";
+            line2 = "No delivery address required";
+            line3 = "";
+            line4 = "";
+        } else {
+            line1 = (address != null) ? address.getStreetAddress() : "";
+            line2 = (address != null) ? address.getCity() : "";
+            line3 = (address != null) ? address.getPostalcode() : "";
+            line4 = (address != null) ? address.getCity() : "";
+        }
 
         String template = """
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Order Confirmation - Mother's Kitchen</title>
-            </head>
-            <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
-            
-            <table width="100%%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
-                <tr>
-                    <td align="center">
-                        <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
-                            
-                            <!-- Header -->
-                            <tr>
-                                <td style="background: linear-gradient(135deg, #ff6b6b 0%%, #ee5a24 100%%); padding: 40px; text-align: center;">
-                                    <div style="font-size: 48px; margin-bottom: 10px;">🍽️</div>
-                                    <h1 style="color: #ffffff; margin: 0; font-size: 32px;">Mother's Kitchen</h1>
-                                    <p style="color: #ffffff; margin: 15px 0 0; font-size: 18px;">Order Confirmed!</p>
-                                </td>
-                            </tr>
-                            
-                            <!-- Content -->
-                            <tr>
-                                <td style="padding: 40px 30px;">
-                                    <h2 style="color: #333333; margin: 0 0 10px; font-size: 24px;">Hi %s,</h2>
-                                    <p style="color: #666666; line-height: 1.6; font-size: 16px; margin-bottom: 30px;">
-                                        Thank you for ordering from Mother's Kitchen! Your meal is being prepared fresh and will be delivered soon.
-                                    </p>
-            
-                                    <!-- Order Summary -->
-                                    <div style="background: #fff3f3; border-left: 4px solid #ff6b6b; padding: 25px; margin-bottom: 30px; border-radius: 8px;">
-                                        <h3 style="color: #333333; margin-bottom: 20px;">Order Summary</h3>
-                                        <table width="100%%" cellpadding="5" cellspacing="0">
-                                            <tr>
-                                                <td><strong>Order Number:</strong></td>
-                                                <td style="text-align: right; color: #ff6b6b; font-weight: bold;">#%s</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Order Date:</strong></td>
-                                                <td style="text-align: right;">%s</td>
-                                            </tr>
-                                            <tr>
-                                                <td><strong>Total Amount:</strong></td>
-                                                <td style="text-align: right; color: #ff6b6b; font-weight: bold;">%.2f kr</td>
-                                            </tr>
-                                        </table>
-                                    </div>
-            
-                                    <!-- Items -->
-                                    <h3 style="color: #333333; margin-bottom: 20px;">Your Order</h3>
-            
-                                    <table width="100%%" cellpadding="0" cellspacing="0">
-                                        %s
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Order Confirmation - Mother's Kitchen</title>
+        </head>
+        <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        
+        <table width="100%%" cellpadding="0" cellspacing="0" style="background-color: #f4f4f4; padding: 20px;">
+            <tr>
+                <td align="center">
+                    <table width="600" cellpadding="0" cellspacing="0" style="background-color: #ffffff; border-radius: 8px; overflow: hidden;">
+                        
+                        <!-- Header -->
+                        <tr>
+                            <td style="background: linear-gradient(135deg, #ff6b6b 0%%, #ee5a24 100%%); padding: 40px; text-align: center;">
+                                <div style="font-size: 48px; margin-bottom: 10px;">🍽️</div>
+                                <h1 style="color: #ffffff; margin: 0; font-size: 32px;">Mother's Kitchen</h1>
+                                <p style="color: #ffffff; margin: 15px 0 0; font-size: 18px;">Order Confirmed!</p>
+                            </td>
+                        </tr>
+                        
+                        <!-- Content -->
+                        <tr>
+                            <td style="padding: 40px 30px;">
+                                <h2 style="color: #333333; margin: 0 0 10px; font-size: 24px;">Hi %s,</h2>
+                                <p style="color: #666666; line-height: 1.6; font-size: 16px; margin-bottom: 30px;">
+                                    Thank you for ordering from Mother's Kitchen! Your meal is being prepared fresh and will be delivered soon.
+                                </p>
+        
+                                <!-- Order Summary -->
+                                <div style="background: #fff3f3; border-left: 4px solid #ff6b6b; padding: 25px; margin-bottom: 30px; border-radius: 8px;">
+                                    <h3 style="color: #333333; margin-bottom: 20px;">Order Summary</h3>
+                                    <table width="100%%" cellpadding="5" cellspacing="0">
+                                        <tr>
+                                            <td><strong>Order Number:</strong></td>
+                                            <td style="text-align: right; color: #ff6b6b; font-weight: bold;">#%s</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Order Date:</strong></td>
+                                            <td style="text-align: right;">%s</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Total Amount:</strong></td>
+                                            <td style="text-align: right; color: #ff6b6b; font-weight: bold;">%.2f kr</td>
+                                        </tr>
                                     </table>
-            
-                                    <!-- Address -->
-                                    <h3 style="margin: 20px 0 10px;">Delivery Address</h3>
-                                    <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
-                                        <p style="margin: 0; color: #666666; line-height: 1.6; font-size: 14px;">
-                                            %s<br>
-                                            %s<br>
-                                            %s - %s<br>
-                                        </p>
-                                    </div>
-            
-                                    <br><br>
-            
-                                    <p style="text-align:center; font-size:14px; color:#888;">
-                                        © 2024 Mother's Kitchen. All rights reserved.
+                                </div>
+        
+                                <!-- Items -->
+                                <h3 style="color: #333333; margin-bottom: 20px;">Your Order</h3>
+        
+                                <table width="100%%" cellpadding="0" cellspacing="0">
+                                    %s
+                                </table>
+        
+                                <!-- Address -->
+                                <h3 style="margin: 20px 0 10px;">Delivery Address</h3>
+                                <div style="background-color: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                    <p style="margin: 0; color: #666666; line-height: 1.6; font-size: 14px;">
+                                        %s<br>
+                                        %s<br>
+                                        %s %s<br>
                                     </p>
-            
-                                </td>
-                            </tr>
-            
-                        </table>
-                    </td>
-                </tr>
-            </table>
-            
-            </body>
-            </html>
-            """;
+                                </div>
+        
+                                <br><br>
+        
+                                <p style="text-align:center; font-size:14px; color:#888;">
+                                    © 2024 Mother's Kitchen. All rights reserved.
+                                </p>
+        
+                            </td>
+                        </tr>
+        
+                    </table>
+                </td>
+            </tr>
+        </table>
+        
+        </body>
+        </html>
+        """;
 
         return String.format(
                 template,
@@ -199,14 +217,9 @@ public class EmailHTML {
                 order.getDeliveryDate(),
                 order.getTotalAmount(),
                 itemsHtml.toString(),
-                address.getStreetAddress(),
-                address.getCity(),
-                address.getPostalcode(),
-                address.getCity()
-
+                line1, line2, line3, line4
         );
     }
-
     private static StringBuilder getStringBuilder(OrdersDTO order) {
         StringBuilder itemsHtml = new StringBuilder();
 
